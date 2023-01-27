@@ -1,4 +1,5 @@
-import {BaseEntity , Column, Entity, PrimaryColumn,OneToMany, ManyToOne} from "typeorm"
+import {BaseEntity , Column, Entity, PrimaryColumn,OneToMany, ManyToOne, OneToOne} from "typeorm"
+import { Posts } from "./Post"
 import { Users } from "./User"
 
 @Entity()
@@ -15,7 +16,8 @@ export class Books extends BaseEntity{
     @Column()
     year: number
 
-    @ManyToOne(()=> Users,(users) => users.id)
-    owner_id: Users
+    @ManyToOne(()=> Users,(users) => users.books)
+    owner: Users
 
-}
+
+} 

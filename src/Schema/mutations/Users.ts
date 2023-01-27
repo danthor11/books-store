@@ -1,8 +1,8 @@
 import { GraphQLString, GraphQLBoolean } from "graphql";
 import { Users } from "../../Entities/User";
-import { UserType } from "../typedefs/User";
+import { LoginType, UserType } from "../typedefs/User";
 import { v4 as uuidv4 } from "uuid";
-
+import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt";
 
 export const CREATE_USER = {
@@ -50,6 +50,13 @@ export const LOG_IN_USER = {
 
     if (!passwordHash) return "";
 
-    return user.password;
+    const token = jwt.sign({
+      name: user.name,
+      email: user.email,
+      id: user.id
+    },"DANIELO",{expiresIn:"1h"})
+
+
+    return token
   },
 };

@@ -1,16 +1,21 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import { graphqlHTTP } from "express-graphql";
 import { schemaConfig } from "./Schema";
 import "./db"
+import { isAuth } from "./middlewares/auth";
 
 const app = express();
 
 
+
 app.use("/graphql", graphqlHTTP({
     schema:schemaConfig,
-    graphiql:true
+    graphiql:true,    
 }))
 
+app.get("/",(req:Request,res :Response) => {
+    res.redirect("/graphql")
+})
 
 
 app.listen(4000,()=>{

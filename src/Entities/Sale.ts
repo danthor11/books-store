@@ -10,12 +10,5 @@ export class Sales extends BaseEntity {
   @Column()
   price: number;
 
-  @OneToOne(() => Books, (book) => book.id)
-  book_id: Books;
-
-  @OneToOne(() => Users, (user) => user.id)
-  seller_id: Users;
-
-  @OneToOne(() => Users, (user) => user.id, { nullable: true })
-  buyer_id: Users;
+  
 }

@@ -1,23 +1,24 @@
 import { Entity, Column, PrimaryColumn, BaseEntity, OneToMany } from "typeorm";
 import { Books } from "./Book";
+import { Posts } from "./Post";
 
 @Entity()
 export class Users  extends BaseEntity{
   @PrimaryColumn()
-  id: String;
+  id: string;
 
   @Column()
-  name: String;
+  name: string;
 
   @Column()
-  email: String;
+  email: string;
 
   @Column()
-  password: String;
+  password: string;
 
-  @OneToMany(()=>Books,(book) => book.id)
-  book_id: Books[];
+  @OneToMany(()=>Books,(book) => book.owner)
+  books: Books[];
 
-  @Column({nullable:true})
-  sale_id: String;
+  @OneToMany(() => Posts, (post) => post.owner)
+  post: Posts[];
 }
