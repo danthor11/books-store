@@ -10,7 +10,7 @@ export class Posts extends BaseEntity {
   @Column()
   description: string;
 
-  @Column()
+  @Column("float")
   price: number;
   
   @OneToOne(() => Books)

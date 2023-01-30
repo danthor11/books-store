@@ -25,7 +25,7 @@ const BookInput = new GraphQLInputObjectType({
     fields: {
       title: { type: GraphQLString },
       author: { type: GraphQLString },
-      year: { type: GraphQLString },
+      year: { type: GraphQLInt },
     }
   })
 
@@ -33,9 +33,8 @@ export const ADD_NEW_BOOK = {
   type: GraphQLBoolean,
   args: {
     input: {type: BookInput},
-    token: { type: GraphQLString },
   },
-  resolve: async (_: unknown, args: any, context: any) => {
+  resolve: async (_: unknown, {input}: any, context: any) => {
     const token = context.headers.authorization;
 
     const userAuth = isAuth(token);
@@ -50,9 +49,9 @@ export const ADD_NEW_BOOK = {
       const book = new Books();
 
       book.id = uuidv4();
-      book.title = args.title;
-      book.author = args.author;
-      book.year = args.year;
+      book.title = input.title;
+      book.author = input.author;
+      book.year = input.year;
       book.owner = user;
 
       await book.save();
@@ -68,10 +67,9 @@ export const ADD_NEW_BOOK = {
 export const DELETE_BOOK = {
   type: GraphQLBoolean,
   args: {
-    token: { type: GraphQLString },
     bookToDeleteId: { type: GraphQLID },
   },
-  async resolve(_: any, { bookToDeleteId, token }: any, context: any) {
+  async resolve(_: any, { bookToDeleteId}: any, context: any) {
     try {
       const _token = context.headers.authorization;
       const userAuth = isAuth(_token);
