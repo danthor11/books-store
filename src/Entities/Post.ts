@@ -13,12 +13,14 @@ export class Posts extends BaseEntity {
   @Column("float")
   price: number;
   
+  
+  @Column({default:true})
+  available: boolean
+  
   @OneToOne(() => Books)
   @JoinColumn()
   book: Books;
-
   
   @ManyToOne(() => Users, (user) => user.post)
   owner: Users;
-
 }

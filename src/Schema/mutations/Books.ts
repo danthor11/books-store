@@ -1,42 +1,17 @@
-import {
-  GraphQLBoolean,
-  GraphQLID,
-  GraphQLInputObjectType,
-  GraphQLInt,
-  GraphQLString,
-} from "graphql";
-import jwt from "jsonwebtoken";
-import { Books } from "../../Entities/Book";
-import { Users } from "../../Entities/User";
+import { GraphQLID, GraphQLString } from "graphql";
+import { Books , Users} from "../../Entities";
 import { v4 as uuidv4 } from "uuid";
 import { isAuth } from "../../middlewares/auth";
-import { userInfo } from "os";
-
-type TokenPayload = {
-  name: string;
-  email: string;
-  id: string;
-  iat: number;
-  exp: number;
-};
-
-const BookInput = new GraphQLInputObjectType({
-    name: "BookInput",
-    fields: {
-      title: { type: GraphQLString },
-      author: { type: GraphQLString },
-      year: { type: GraphQLInt },
-    }
-  })
+import { BookInput } from "../typedefs/Book";
+import { ResponseType } from "../typedefs/Response";
 
 export const ADD_NEW_BOOK = {
-  type: GraphQLBoolean,
+  type: ResponseType,
   args: {
-    input: {type: BookInput},
+    input: { type: BookInput },
   },
-  resolve: async (_: unknown, {input}: any, context: any) => {
+  resolve: async (_: unknown, { input }: any, context: any) => {
     const token = context.headers.authorization;
-
     const userAuth = isAuth(token);
 
     try {
@@ -56,20 +31,25 @@ export const ADD_NEW_BOOK = {
 
       await book.save();
 
-      return true;
+      return {
+        success: true,
+        message: "THE BOOK HAS BEEN ADDED SUCCESSFULLY!",
+      };
     } catch (error) {
-      console.log(error);
-      return false;
+      return {
+        success: false,
+        message: error,
+      };
     }
   },
 };
 
 export const DELETE_BOOK = {
-  type: GraphQLBoolean,
+  type: ResponseType,
   args: {
     bookToDeleteId: { type: GraphQLID },
   },
-  async resolve(_: any, { bookToDeleteId}: any, context: any) {
+  async resolve(_: any, { bookToDeleteId }: any, context: any) {
     try {
       const _token = context.headers.authorization;
       const userAuth = isAuth(_token);
@@ -77,50 +57,58 @@ export const DELETE_BOOK = {
 
       const { affected } = await Books.delete(bookToDeleteId);
 
-      return affected === 1;
-    } catch (error) {
-      console.log(error);
-    }
+      if (affected !== 1) throw Error("ERROR IN THE DELETE ACTION");
 
-    return false;
+      return {
+        success: true,
+        message: "THE BOOK HAS BEEN DELETE SUCCESSFULLY!",
+      };
+    } catch (error) {
+      return {
+        success: true,
+        message: error,
+      };
+    }
   },
 };
 
 export const UPDATE_BOOK = {
-  type: GraphQLBoolean,
+  type: ResponseType,
   args: {
     id: { type: GraphQLID },
     token: { type: GraphQLString },
     input: {
-      type: BookInput
+      type: BookInput,
     },
   },
   async resolve(_: any, { id, input }: any, context: any) {
-    const auth = context.headers.authorization
-    const user = isAuth(auth)
-    
-    if(typeof user === "string")
-        return false
+    const auth = context.headers.authorization;
+    const user = isAuth(auth);
+
+    if (typeof user === "string") return false;
 
     try {
-        const bookToUpdate = await Books.findOneBy({id})
+      const bookToUpdate = await Books.findOneBy({ id });
 
-        if(!bookToUpdate)
-            throw Error("Book doesn't exist")
+      if (!bookToUpdate) throw Error("Book doesn't exist");
 
+      bookToUpdate.title = input.title;
+      bookToUpdate.author = input.author;
+      bookToUpdate.year = input.year;
 
-        bookToUpdate.title = input.title
-        bookToUpdate.author = input.author
-        bookToUpdate.year = input.year
+      await bookToUpdate.save();
 
-        const res = await bookToUpdate.save()
-        console.log(res)
+      return {
+        success:false,
+        message: "THE BOOK INFORMATION HAS BEEN UPDATED!"
+      };
     } catch (error) {
-        return false
+      return {
+        success: true,
+        message: "THE BOOK HAS BEEN DELETE SUCCESSFULLY!",
+      };
     }
 
-    return true
+    return true;
   },
 };
-
-

@@ -2,11 +2,8 @@ import express, { Request, Response } from "express";
 import { graphqlHTTP } from "express-graphql";
 import { schemaConfig } from "./Schema";
 import "./db"
-import { isAuth } from "./middlewares/auth";
 
 const app = express();
-
-
 
 app.use("/graphql", graphqlHTTP({
     schema:schemaConfig,

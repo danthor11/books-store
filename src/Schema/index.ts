@@ -1,6 +1,7 @@
 import {GraphQLObjectType , GraphQLSchema} from "graphql"
 import { ADD_NEW_BOOK, DELETE_BOOK, UPDATE_BOOK } from "./mutations/Books"
 import { ADD_NEW_POST, DELETE_POST, UPDATE_POST } from "./mutations/Posts"
+import { BUY_A_BOOK } from "./mutations/Sales"
 import { CREATE_USER, LOG_IN_USER } from "./mutations/Users"
 import { GET_BOOKS_BY_USER_ID, GET_BOOK_ID } from "./queries/Books"
 import { GET_ALL_USER, GET_USER_BY_ID } from "./queries/getAllUsers"
@@ -33,7 +34,9 @@ const mutation = new GraphQLObjectType({
 
         "addNewPost":ADD_NEW_POST,
         "updateAPost": UPDATE_POST,
-        "deletePostById": DELETE_POST
+        "deletePostById": DELETE_POST,
+
+        "buyBook":BUY_A_BOOK
     }
 })
 

@@ -1,29 +1,12 @@
-import { GraphQLArgs, GraphQLBoolean, GraphQLFloat, GraphQLID, GraphQLInputObjectType, GraphQLString } from "graphql"
-import { Books } from "../../Entities/Book";
-import { Posts } from "../../Entities/Post";
-import { Users } from "../../Entities/User";
+import { GraphQLID} from "graphql"
+import { Books , Posts , Sales ,Users} from "../../Entities";
 import { isAuth } from "../../middlewares/auth";
 import {v4 as uuidv4} from "uuid"
-
-const InputPost = new GraphQLInputObjectType({
-    name: "InputPost",
-    fields:{
-        description: {type:GraphQLString},
-        price: {type:GraphQLFloat},
-        book: {type:GraphQLID}
-    }
-})
-
-const InputUpdatePost = new GraphQLInputObjectType({
-    name: "InputUpdatePost",
-    fields:{
-        description: {type:GraphQLString},
-        price: {type:GraphQLFloat},
-    }
-})
+import { InputPost, InputUpdatePost } from "../typedefs/Input";
+import { ResponseType } from "../typedefs/Response";
 
 export const ADD_NEW_POST = {
-    type: GraphQLBoolean,
+    type: ResponseType,
     args: {
         input: { type: InputPost}
     },
@@ -32,7 +15,7 @@ export const ADD_NEW_POST = {
         const token = context.headers.authorization;
 
         const userAuth = isAuth(token);
-        console.log(userAuth)
+      
         try {
             if (typeof userAuth === "string") throw Error("NOT TOKEN");
             
@@ -46,8 +29,6 @@ export const ADD_NEW_POST = {
                 .where("books.id = :id",{id:input.book})
                 .getOne()
             
-                
-                
             if(!book) throw Error("BOOK_DOESNT_EXIST")
             if(!book.owner.id.includes(userAuth.id)) throw Error("YOU CANT POST A BOOK THAT DOESNT BELONG TO YOU")
         
@@ -63,18 +44,24 @@ export const ADD_NEW_POST = {
 
             console.log(res)
 
-            return true
+            return {
+                success: true,
+                message: "THE POST HAS BEEN CREATED!"
+            }
         }
         catch(error){
-            console.log(error) 
-            return false
+           
+            return {
+                success:false,
+                message: error
+            }
         }
     }
 }
 
 
 export const DELETE_POST = {
-    type: GraphQLBoolean,
+    type: ResponseType,
     args:{
         id:{type:GraphQLID}
     },
@@ -97,20 +84,26 @@ export const DELETE_POST = {
             if(!book) throw Error("POST_DOESNT_EXIST")
             if(!book.owner.id.includes(userAuth.id)) throw Error("YOU CANT DELETE A POST THAT DOESNT BELONG TO YOU")
 
-            console.log(await book.remove())
+            await book.remove()
 
-            return true
+            return {
+                success: true,
+                message: "THE POST HAS BEEN CREATED!"
+            }
         }
         catch(error){
-            console.log(error)
-            return false
+            
+            return {
+                success: false,
+                message: error
+            }
         }
     }
 }
 
 
 export const UPDATE_POST = {
-    type: GraphQLBoolean,
+    type: ResponseType,
     args:{
         input: {type: InputUpdatePost},
         id:{type:GraphQLID}
@@ -138,14 +131,18 @@ export const UPDATE_POST = {
             book.description=input.description
             book.price = input.price
 
-            const res = await book.save()
+            await book.save()
             
-
-            return true
+            return {
+                success: true,
+                message: "THE POST HAS BEEN CREATED!"
+            }
         }
         catch(error){
-            console.log(error)
-            return false
+            return {
+                success: true,
+                message: error
+            }
         }
     }
 }

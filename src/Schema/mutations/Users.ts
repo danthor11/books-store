@@ -1,31 +1,39 @@
-import { GraphQLString, GraphQLBoolean } from "graphql";
+import { GraphQLString } from "graphql";
 import { Users } from "../../Entities/User";
-import { LoginType, UserType } from "../typedefs/User";
 import { v4 as uuidv4 } from "uuid";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { ResponseType } from "../typedefs/Response";
 
 export const CREATE_USER = {
-  type: UserType,
+  type: ResponseType,
   args: {
     name: { type: GraphQLString },
     email: { type: GraphQLString },
     password: { type: GraphQLString },
   },
   async resolve(_: unknown, args: any) {
-    const userToSave = new Users();
+    try {
+      const userToSave = new Users();
 
-    userToSave.id = uuidv4();
-    userToSave.name = args.name;
-    userToSave.email = args.email;
-    userToSave.password = await bcrypt.hash(args.password, 10);
+      userToSave.id = uuidv4();
+      userToSave.name = args.name;
+      userToSave.email = args.email;
+      userToSave.password = await bcrypt.hash(args.password, 10);
 
-    const result = await userToSave.save();
+      const result = await userToSave.save();
 
-    console.log(result);
-    if (result) return result;
-
-    return null;
+      if (result)
+        return {
+          success: true,
+          message: "USER CREATED SUCCESSFULLY!",
+        };
+    } catch (error) {
+      return {
+        success: true,
+        message: error,
+      };
+    }
   },
 };
 
@@ -50,13 +58,16 @@ export const LOG_IN_USER = {
 
     if (!passwordHash) return "";
 
-    const token = jwt.sign({
-      name: user.name,
-      email: user.email,
-      id: user.id
-    },"DANIELO",{expiresIn:"1h"})
+    const token = jwt.sign(
+      {
+        name: user.name,
+        email: user.email,
+        id: user.id,
+      },
+      "DANIELO",
+      { expiresIn: "1h" }
+    );
 
-
-    return token
+    return token;
   },
 };
